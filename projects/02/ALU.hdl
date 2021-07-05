@@ -43,4 +43,56 @@ CHIP ALU {
 
     PARTS:
    // Put you code here:
+
+//    Not16(in=x, out=notX);
+//    Not16(in=y, out=notY);
+
+//    // x part
+//    Mux16(a=x, b=false, sel=zx, out=out1x);
+//    Mux16(a=out1x, b=notX, sel=nx, out=outFinalX);
+
+//    // y part
+//    Mux16(a=y, b=false, sel=zy, out=out1y);
+//    Mux16(a=out1y, b=notY, sel=ny, out=outFinalY);
+
+//    // sum or and of x and y
+//    Add16(a=outFinalX, b=outFinalY, out=outSumXY);
+//    And16(a=outFinalX, b=outFinalY, out=outAndXY);
+//    Mux16(a=outAndXY, b=outSumXY, sel=f, out=outSelection);
+
+//    // not or not the result
+//     Not16(in=outSelection, out=notOutSelection);
+//     Mux16(a=outSelection, b=notOutSelection, sel=no, out=out, out[15] = firstBit, out[0..7]=finalLeft, out[8..15]=finalRight);
+
+//     //zr and ng
+
+//     And(a=firstBit, b=true, out=ng);
+
+//     Or8Way(in=finalLeft, out=zrl);
+//     Or8Way(in=finalRight, out=zrr);
+//     Or(a=zrl, b=zrr, out=nzr);
+//     Not(in=nzr, out=zr);
+
+Mux16(a=x, b=false, sel=zx, out=x1);
+Mux16(a=y, b=false, sel=zy, out=y1);
+
+Not16(in=x1, out=notx1);
+Mux16(a=x1, b=notx1, sel=nx, out=x2);
+Not16(in=y1, out=noty1);
+Mux16(a=y1, b=noty1, sel=ny, out=y2);
+
+Add16(a=x2, b=y2, out=addout);
+And16(a=x2, b=y2, out=andout);
+Mux16(a=andout, b=addout, sel=f, out=fout);
+
+Not16(in=fout, out=notfout);
+Mux16(a=fout, b=notfout, sel=no, out=out, out[0..7]=out7, out[8..15]=out15, out[15]=isng);
+
+Or8Way(in=out7, out=zr0);
+Or8Way(in=out15, out=zr1);
+Or(a=zr0, b=zr1, out=zr2);
+Not(in=zr2, out=zr);
+
+And(a=isng, b=true, out=ng);
+
 }
