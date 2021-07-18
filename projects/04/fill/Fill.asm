@@ -12,3 +12,55 @@
 // the screen should remain fully clear as long as no key is pressed.
 
 // Put your code here.
+
+
+(LOOP)
+    @SCREEN
+    D=A
+    @addr
+    M=D
+
+    @KBD
+    D=M
+
+    @BLACKEN_SCREEN
+        D;JNE
+    
+
+    (WHITEN_SCREEN) 
+
+        @addr
+        A=M
+        M=0
+
+        @addr
+        M=M+1
+
+        @KBD  // KBD marks the end of the screen
+        D=A
+        @addr
+        D=D-M
+        @LOOP
+        D;JLE // Check the address is in bounds; reset if not
+        
+        @WHITEN_SCREEN
+        0;JMP
+    
+    (BLACKEN_SCREEN)   
+        @addr
+        A=M
+        M=-1
+
+        @addr
+        M=M+1
+
+        @KBD  // KBD marks the end of the screen
+        D=A
+        @addr
+        D=D-M
+        @LOOP
+        D;JLE // Check the address is in bounds; reset if not
+        
+        @BLACKEN_SCREEN
+        0;JMP
+        
