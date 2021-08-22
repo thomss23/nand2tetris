@@ -1,1 +1,0 @@
-java -jar VMTranslator-1.0-SNAPSHOT.jar
