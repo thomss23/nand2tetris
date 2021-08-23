@@ -3,6 +3,9 @@ package com.tomsoft;
 import java.io.*;
 import java.util.Locale;
 
+import static com.tomsoft.CommandType.C_PUSH;
+import static com.tomsoft.TemplateFormatBranchingFunctions.*;
+
 public class CodeWriter {
 
     private BufferedWriter writer;
@@ -13,9 +16,9 @@ public class CodeWriter {
 
     private static int COUNT_VAR = 1;
 
-    public CodeWriter(String fileName) throws IOException {
+    public CodeWriter(File fileName) throws IOException {
         this.writer = new BufferedWriter(new FileWriter(fileName));
-        this.fileName = fileName;
+        this.fileName = fileName.getName();
     }
 
     // writes to the output file the assembly code that implements the given arithmetic command
@@ -270,7 +273,7 @@ public class CodeWriter {
                 "@SP\n" +
                 "M=M+1";
 
-        if(commandType.equals(CommandType.C_PUSH)) {
+        if(commandType.equals(C_PUSH)) {
 
             switch (segment) {
                 case "constant":
@@ -366,11 +369,59 @@ public class CodeWriter {
         writer.write(asmCommand + "\n");
     }
 
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public void writeInit() throws IOException {
+        writer.write(FORMAT_INIT);
+        writeCall("Sys.init", 0);
+    }
+
+    public void writeLabel(String label) throws IOException {
+        writer.write("// C_LABEL " + label + '\n');
+        writer.write("(" + label + ")\n");
+    }
+
+    public void writeGoTo(String label) throws IOException {
+        writer.write("//  C_GOTO " + label + '\n');
+        String asmCommand = String.format(FORMAT_GO_TO, label);
+        writer.write(asmCommand);
+    }
+
+    public void writeIf(String label) throws IOException {
+        writer.write("// C_IF " + label + '\n');
+        String asmCommand = String.format(FORMAT_IF, label);
+        writer.write(asmCommand);
+    }
+
+    public void writeFunction(String functionName, int numArgs) throws IOException {
+        writer.write("// function " + functionName + " " + numArgs + '\n');
+        writeLabel(functionName);
+        for(int i = 0; i < numArgs; i++) {
+            writePushPop(C_PUSH, "constant", 0);
+        }
+    }
+
+    public void writeCall(String functionName, int numArgs) throws IOException {
+        writer.write("// call " + functionName + " " + numArgs + '\n');
+
+        String asmCommand = String.format(FORMAT_CALL, COUNT_VAR, numArgs);
+        writer.write(asmCommand);
+        writeGoTo(functionName);
+        writeLabel("return-address" + COUNT_VAR);
+        COUNT_VAR++;
+
+
+    }
+
+    public void writeReturn() throws IOException {
+        writer.write("// return\n");
+        writer.write(RETURN);
+    }
+
     public void close() throws IOException {
         writer.close();
     }
-
-
-
 
 }

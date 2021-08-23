@@ -1,7 +1,7 @@
 package com.tomsoft;
 
 public enum CommandType {
-    C_ARITHEMTIC,
+    C_ARITHMETIC,
     C_PUSH,
     C_POP,
     C_LABEL,

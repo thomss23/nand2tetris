@@ -12,11 +12,9 @@ public class Parser {
 
     private final Scanner reader;
 
-    public Parser(String fileName) throws FileNotFoundException {
+    public Parser(File fileName) throws FileNotFoundException {
 
-        File file = new File(fileName);
-
-        reader = new Scanner(file);
+        reader = new Scanner(fileName);
 
     }
 
@@ -70,8 +68,8 @@ public class Parser {
     public CommandType commandType() {
         String[] commandTokens = currentCommand.split(" ");
 
-        if(commandTokens.length == 1) {
-            return C_ARITHEMTIC;
+        if(commandTokens.length == 1 && !commandTokens[0].equals("return")) {
+            return C_ARITHMETIC;
         }
 
         switch (commandTokens[0]) {
@@ -79,6 +77,19 @@ public class Parser {
                 return C_PUSH;
             case "pop":
                 return C_POP;
+            case "label":
+                return C_LABEL;
+            case "goto":
+                return C_GOTO;
+            case "if-goto":
+                return C_IF;
+            case "function":
+                return C_FUNCTION;
+            case "call":
+                return C_CALL;
+            case "return":
+                return C_RETURN;
+
             default:
                 return null;
         }
