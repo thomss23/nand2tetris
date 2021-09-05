@@ -2,6 +2,7 @@ package com.company;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class JackAnalyzer {
@@ -32,12 +33,13 @@ public class JackAnalyzer {
 
                     for(File file : files) {
                         JackTokenizer jackTokenizer = new JackTokenizer(file);
-                        CompilationEngine compilationEngine = new CompilationEngine(jackTokenizer, output);
-                        compilationEngine.compileClass();
+                        jackTokenizer.testTokenizer();
+//                        CompilationEngine compilationEngine = new CompilationEngine(jackTokenizer, output);
+//                        compilationEngine.compileClass();
                     }
 
                 }
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
 
