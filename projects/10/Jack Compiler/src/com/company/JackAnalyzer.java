@@ -33,13 +33,15 @@ public class JackAnalyzer {
 
                     for(File file : files) {
                         JackTokenizer jackTokenizer = new JackTokenizer(file);
-                        jackTokenizer.testTokenizer();
-//                        CompilationEngine compilationEngine = new CompilationEngine(jackTokenizer, output);
-//                        compilationEngine.compileClass();
+//                        jackTokenizer.testTokenizer();
+                        CompilationEngine compilationEngine = new CompilationEngine(jackTokenizer, output);
+                        compilationEngine.compileClass();
                     }
 
                 }
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 

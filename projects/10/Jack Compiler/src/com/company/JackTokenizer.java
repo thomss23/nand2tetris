@@ -67,9 +67,8 @@ public class JackTokenizer {
     }
 
     private void tokenizeString(String str) {
-//        final String regex = "([().]|[;.]|[\\{\\}.]|[\\[\\].]|['\\w]+|[+.]|[-.]|[\\/.]|[\\\\.]|[*.]|[&.]|[|.]|[=.]|[<.]|[>.]|[,.]|[~.]|[\".])";
-        final String regex = "([().]|[;.]|[\\{\\}.]|[\\[\\].]|['\\w]+|[+.]|[-.]|[\\/.]|[\\\\.]|[*.]|[&.]|[|.]|[=.]|[<.]|[>.]|[,.]|\\\"[^\\\"]*\\\")";
 
+        final String regex = "([().]|[;.]|[\\{\\}.]|[\\[\\].]|['\\w]+|[+.]|[-.]|[\\/.]|[\\\\.]|[*.]|[&.]|[|.]|[=.]|[<.]|[>.]|[,.]|\\\"[^\\\"]*\\\")";
 
         final Pattern pattern = Pattern.compile(regex);
         final Matcher matcher = pattern.matcher(str);
@@ -164,19 +163,20 @@ public class JackTokenizer {
             currentToken = tokenList.get(positionInTokenList);
             positionInTokenList++;
         }
-
-
     }
 
     public String getCurrentToken() {
         return currentToken;
     }
 
+    public String peekAtNextToken() {
+        return tokenList.get(positionInTokenList + 1);
+    }
+
     public void testTokenizer() throws IOException {
         writer.write("<tokens>" + "\n  ");
         while(hasMoreTokens()) {
                 setNextToken();
-                    if(currentToken != null) {
                         switch (tokenType()) {
                             case SYMBOL:
                                 writer.write("<symbol> " + symbol() + " </symbol>\n  ");
@@ -194,7 +194,7 @@ public class JackTokenizer {
                                 writer.write("<stringConstant> " + stringVal() + " </stringConstant>\n  ");
                                 break;
                         }
-                    }
+
 
         }
         writer.write("</tokens>".trim());
