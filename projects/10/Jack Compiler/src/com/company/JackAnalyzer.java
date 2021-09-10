@@ -30,7 +30,7 @@ public class JackAnalyzer {
                     } else {
                         output = new File(input, outputName + ".xml");
                     }
-
+                    System.out.println("Type list " + Keyword.TYPE.toString());
                     for(File file : files) {
                         JackTokenizer jackTokenizer = new JackTokenizer(file);
 //                        jackTokenizer.testTokenizer();
@@ -57,6 +57,7 @@ public class JackAnalyzer {
                 String fileExtension = filename.substring(extension + 1);
                 if(fileExtension.equalsIgnoreCase("jack")) {
                     files.add(input);
+                    Keyword.TYPE.add(filename.substring(0, extension));
                 }
             }
         } else if(input.isDirectory()) {
@@ -68,6 +69,5 @@ public class JackAnalyzer {
             throw new FileNotFoundException("Could not find file or directory.");
         }
     }
-
 
 }

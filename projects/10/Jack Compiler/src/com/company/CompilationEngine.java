@@ -23,6 +23,7 @@ public class CompilationEngine {
 
     public void compileClass() throws Exception {
         eat("class");
+        eatShallowNonTerminalRule();
         eat("{");
         eatShallowNonTerminalRule();
 
@@ -118,12 +119,33 @@ public class CompilationEngine {
             compileParameterList();
 
         }
-        compileVarDec();
-        compileStatements();
+        eat(")");
+
+        while(jackTokenizer.getCurrentToken().equals("var")) {
+            compileVarDec();
+        }
+
+        eat(";");
+
+        while (jackTokenizer.getCurrentToken().equals("let")
+                || jackTokenizer.getCurrentToken().equals("if")
+                || jackTokenizer.getCurrentToken().equals("while")
+                || jackTokenizer.getCurrentToken().equals("do")
+                || jackTokenizer.getCurrentToken().equals("return")) {
+
+            compileStatements();
+
+        }
+
+        eat("}");
+
 
     }
 
     public void compileParameterList() throws Exception {
+        if(!Keyword.TYPE.contains(jackTokenizer.getCurrentToken())) {
+            throw new Exception(jackTokenizer.getCurrentToken() + " isn't a valid type");
+        }
         eatShallowNonTerminalRule();
         eatShallowNonTerminalRule();
         if (!jackTokenizer.peekAtNextToken().equals(")")) {
@@ -131,12 +153,42 @@ public class CompilationEngine {
         }
     }
 
-    public void compileVarDec() {
+    public void compileVarDec() throws Exception {
+        eat("var");
+
+        if(!Keyword.TYPE.contains(jackTokenizer.getCurrentToken())) {
+            throw new Exception(jackTokenizer.getCurrentToken() + " isn't a valid type");
+        }
+
+        eatShallowNonTerminalRule();
+        eatShallowNonTerminalRule();
+
+        if (!jackTokenizer.peekAtNextToken().equals(";")) {
+            eat(",");
+        }
 
     }
 
-    public void compileStatements() {
-
+    public void compileStatements() throws Exception {
+        switch (jackTokenizer.getCurrentToken()) {
+            case "if":
+                compileIf();
+                break;
+            case "let" :
+                compileLet();
+                break;
+            case "while":
+                compileWhile();
+                break;
+            case "do":
+                compileDo();
+                break;
+            case "return" :
+                compileReturn();
+                break;
+            default:
+                throw new Exception(jackTokenizer.getCurrentToken() + " is not a valid statement");
+        }
     }
 
     public void compileDo() {
