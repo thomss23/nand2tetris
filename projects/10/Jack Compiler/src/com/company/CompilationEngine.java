@@ -11,8 +11,8 @@ import static com.company.TokenType.IDENTIFIER;
 
 public class CompilationEngine {
 
-    private JackTokenizer jackTokenizer;
-    private Writer writer;
+    private final JackTokenizer jackTokenizer;
+    private final Writer writer;
 
     public CompilationEngine(JackTokenizer input, File file) throws IOException {
         this.jackTokenizer = input;
@@ -40,7 +40,8 @@ public class CompilationEngine {
                     || jackTokenizer.getCurrentToken().equals("void")
                     || jackTokenizer.getCurrentToken().equals("int")
                     || jackTokenizer.getCurrentToken().equals("char")
-                    || jackTokenizer.getCurrentToken().equals("boolean")) {// trebuie regandit asta
+                    || jackTokenizer.getCurrentToken().equals("boolean")
+                    || Character.isUpperCase(jackTokenizer.getCurrentToken().charAt(0))) {// trebuie regandit asta
 
                 compileSubroutine();
             }
@@ -105,12 +106,29 @@ public class CompilationEngine {
 
     }
 
-    public void compileSubroutine() {
-        //TODO next
+    public void compileSubroutine() throws Exception {
+        eat(jackTokenizer.getCurrentToken());
+        eat(jackTokenizer.getCurrentToken());
+        eat("(");
+        while(jackTokenizer.getCurrentToken().equals("int")
+                || jackTokenizer.getCurrentToken().equals("char")
+                || jackTokenizer.getCurrentToken().equals("boolean")
+                || Character.isUpperCase(jackTokenizer.getCurrentToken().charAt(0))) {
+
+            compileParameterList();
+
+        }
+        compileVarDec();
+        compileStatements();
+
     }
 
-    public void compileParameterList() {
-
+    public void compileParameterList() throws Exception {
+        eatShallowNonTerminalRule();
+        eatShallowNonTerminalRule();
+        if (!jackTokenizer.peekAtNextToken().equals(")")) {
+            eat(",");
+        }
     }
 
     public void compileVarDec() {

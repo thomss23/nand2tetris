@@ -1,5 +1,8 @@
 package com.company;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 public enum Keyword {
     CLASS,
     METHOD,
@@ -21,6 +24,8 @@ public enum Keyword {
     TRUE,
     FALSE,
     NULL,
-    THIS
+    THIS;
+
+    public static HashSet<String> TYPE = new HashSet<>(Arrays.asList("int","char","boolean"));
 
 }
