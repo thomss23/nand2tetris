@@ -191,7 +191,10 @@ public class CompilationEngine {
         }
     }
 
-    public void compileDo() {
+    public void compileDo() throws Exception {
+        eat("do");
+        eatShallowNonTerminalRule();
+        eat(";");
 
     }
 
@@ -203,11 +206,18 @@ public class CompilationEngine {
 
     }
 
-    public void compileReturn() {
-
+    public void compileReturn() throws Exception {
+        eat("return");
+        if(!jackTokenizer.peekAtNextToken().equals(";")) {
+            compileExpression();
+        }
+        eat(";");
     }
 
-    public void compileIf() {
+    public void compileIf() throws Exception {
+        eat("if");
+        eat("(");
+
 
     }
 
