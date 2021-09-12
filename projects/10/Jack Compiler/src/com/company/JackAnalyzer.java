@@ -2,7 +2,6 @@ package com.company;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class JackAnalyzer {
@@ -31,21 +30,17 @@ public class JackAnalyzer {
                         output = new File(input, outputName + ".xml");
                     }
                     System.out.println("Type list " + Keyword.TYPE.toString());
+                    System.out.println("File list " + files);
                     for(File file : files) {
                         JackTokenizer jackTokenizer = new JackTokenizer(file);
-//                        jackTokenizer.testTokenizer();
-                        CompilationEngine compilationEngine = new CompilationEngine(jackTokenizer, output);
+                        CompilationEngine compilationEngine = new CompilationEngine(jackTokenizer, file.getName());
                         compilationEngine.compileClass();
                     }
 
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-
         }
     }
 

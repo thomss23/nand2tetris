@@ -26,6 +26,9 @@ public enum Keyword {
     NULL,
     THIS;
 
-    public static HashSet<String> TYPE = new HashSet<>(Arrays.asList("int","char","boolean"));
+    public static HashSet<String> TYPE = new HashSet<>(Arrays.asList("int", "char", "boolean", "String", "Array","Square","SquareGame"));
+    public static HashSet<String> OP = new HashSet<>(Arrays.asList("+", "-",  "*", "/" ,"&", "|", "<", ">", "="));
+    public static final HashSet<String> UNARY_OP = new HashSet<>(Arrays.asList("-",  "~"));
+
 
 }

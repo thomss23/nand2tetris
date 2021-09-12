@@ -1,23 +1,18 @@
 package com.company;
 
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Objects;
+import java.io.*;
 
-import static com.company.TokenType.IDENTIFIER;
+import static com.company.Keyword.*;
 
 public class CompilationEngine {
 
     private final JackTokenizer jackTokenizer;
     private final Writer writer;
 
-    public CompilationEngine(JackTokenizer input, File file) throws IOException {
+    public CompilationEngine(JackTokenizer input, String file) throws IOException {
         this.jackTokenizer = input;
-        int pos = file.getName().indexOf('.');
-        writer = new FileWriter(file.getName().substring(0,pos) +".xml");
+        writer = new BufferedWriter(new FileWriter(file.substring(0, file.indexOf(".")) + ".xml"));
         jackTokenizer.setNextToken();
     }
 
@@ -25,12 +20,12 @@ public class CompilationEngine {
         eat("class");
         eatShallowNonTerminalRule();
         eat("{");
-        eatShallowNonTerminalRule();
-
         while(jackTokenizer.hasMoreTokens()) {
             if((jackTokenizer.getCurrentToken().equals("static")
                     || jackTokenizer.getCurrentToken().equals("field")) && jackTokenizer.hasMoreTokens()) {
                 compileClassVarDec();
+            } else {
+                break;
             }
         }
 
@@ -42,14 +37,17 @@ public class CompilationEngine {
                     || jackTokenizer.getCurrentToken().equals("int")
                     || jackTokenizer.getCurrentToken().equals("char")
                     || jackTokenizer.getCurrentToken().equals("boolean")
-                    || Character.isUpperCase(jackTokenizer.getCurrentToken().charAt(0))) {// trebuie regandit asta
+                    || TYPE.contains(jackTokenizer.getCurrentToken())) {
 
                 compileSubroutine();
+            } else {
+                break;
             }
         }
 
         eat("}");
-
+        close();
+        jackTokenizer.close();
     }
     private void eatShallowNonTerminalRule() throws Exception {
         switch (jackTokenizer.tokenType()) {
@@ -62,15 +60,22 @@ public class CompilationEngine {
             case KEYWORD:
                 writer.write("<keyword> " + jackTokenizer.keyword() + " </keyword>\n");
                 break;
+            case INT_CONST:
+                writer.write("<integerConstant> " + jackTokenizer.intVal() + " </integerConstant>\n");
+                break;
+            case STRING_CONST:
+                writer.write("<stringConstant> " + jackTokenizer.stringVal() + " </stringConstant>\n");
+                break;
             default:
                 throw new Exception("Expected shallow non terminal rule but got " + jackTokenizer.getCurrentToken());
         }
+        writer.flush();
         if(jackTokenizer.hasMoreTokens()) {
             jackTokenizer.setNextToken();
         }
     }
     private void eat(String str) throws Exception {
-        if(!Objects.equals(jackTokenizer.getCurrentToken(), str)) {
+        if(!jackTokenizer.getCurrentToken().equals(str)) {
             throw new Exception("Expected " + jackTokenizer.getCurrentToken() +" but got " + str);
         } else {
             switch (jackTokenizer.tokenType()) {
@@ -81,6 +86,7 @@ public class CompilationEngine {
                     writer.write("<keyword> " + jackTokenizer.keyword() + " </keyword>\n");
                     break;
             }
+            writer.flush();
             if(jackTokenizer.hasMoreTokens())
                 jackTokenizer.setNextToken();
         }
@@ -97,10 +103,9 @@ public class CompilationEngine {
         eatShallowNonTerminalRule();
         eatShallowNonTerminalRule();
         if(jackTokenizer.getCurrentToken().equals(",")) {
-            eat(",");
-            while(jackTokenizer.tokenType().equals(IDENTIFIER)) {
-                eatShallowNonTerminalRule();
+            while(!jackTokenizer.getCurrentToken().equals(";")) {
                 eat(",");
+                eatShallowNonTerminalRule();
             }
         }
         eat(";");
@@ -108,107 +113,134 @@ public class CompilationEngine {
     }
 
     public void compileSubroutine() throws Exception {
-        eat(jackTokenizer.getCurrentToken());
-        eat(jackTokenizer.getCurrentToken());
+
+        eatShallowNonTerminalRule();
+        eatShallowNonTerminalRule();
+        eatShallowNonTerminalRule();
+
         eat("(");
-        while(jackTokenizer.getCurrentToken().equals("int")
-                || jackTokenizer.getCurrentToken().equals("char")
-                || jackTokenizer.getCurrentToken().equals("boolean")
-                || Character.isUpperCase(jackTokenizer.getCurrentToken().charAt(0))) {
+
+        while(TYPE.contains(jackTokenizer.getCurrentToken())) {
 
             compileParameterList();
 
         }
+
+        if(!TYPE.contains(jackTokenizer.getCurrentToken()) && !jackTokenizer.getCurrentToken().equals(")")) {
+            throw new Exception(jackTokenizer.getCurrentToken() + "is not a valid type");
+        }
+
         eat(")");
 
-        while(jackTokenizer.getCurrentToken().equals("var")) {
-            compileVarDec();
-        }
-
-        eat(";");
-
-        while (jackTokenizer.getCurrentToken().equals("let")
-                || jackTokenizer.getCurrentToken().equals("if")
-                || jackTokenizer.getCurrentToken().equals("while")
-                || jackTokenizer.getCurrentToken().equals("do")
-                || jackTokenizer.getCurrentToken().equals("return")) {
-
-            compileStatements();
-
-        }
-
+        eat("{");
+        compileVarDec();
+        compileStatements();
         eat("}");
 
 
     }
 
     public void compileParameterList() throws Exception {
-        if(!Keyword.TYPE.contains(jackTokenizer.getCurrentToken())) {
-            throw new Exception(jackTokenizer.getCurrentToken() + " isn't a valid type");
-        }
         eatShallowNonTerminalRule();
         eatShallowNonTerminalRule();
-        if (!jackTokenizer.peekAtNextToken().equals(")")) {
+        if (!jackTokenizer.getCurrentToken().equals(")")) {
             eat(",");
         }
     }
 
+    //rethink
     public void compileVarDec() throws Exception {
-        eat("var");
+        while(jackTokenizer.getCurrentToken().equals("var")) {
+            eat("var");
 
-        if(!Keyword.TYPE.contains(jackTokenizer.getCurrentToken())) {
-            throw new Exception(jackTokenizer.getCurrentToken() + " isn't a valid type");
-        }
+            if(!TYPE.contains(jackTokenizer.getCurrentToken())) {
+                throw new Exception(jackTokenizer.getCurrentToken() + " isn't a valid type");
+            }
 
-        eatShallowNonTerminalRule();
-        eatShallowNonTerminalRule();
+            eatShallowNonTerminalRule();
+            eatShallowNonTerminalRule();
 
-        if (!jackTokenizer.peekAtNextToken().equals(";")) {
-            eat(",");
+            while (jackTokenizer.getCurrentToken().equals(",")) {
+                eat(",");
+                eatShallowNonTerminalRule();
+            }
+            eat(";");
         }
 
     }
 
     public void compileStatements() throws Exception {
-        switch (jackTokenizer.getCurrentToken()) {
-            case "if":
-                compileIf();
-                break;
-            case "let" :
-                compileLet();
-                break;
-            case "while":
-                compileWhile();
-                break;
-            case "do":
-                compileDo();
-                break;
-            case "return" :
-                compileReturn();
-                break;
-            default:
-                throw new Exception(jackTokenizer.getCurrentToken() + " is not a valid statement");
+        while (!jackTokenizer.getCurrentToken().equals("}")) {
+            switch (jackTokenizer.getCurrentToken()) {
+                case "if":
+                    compileIf();
+                    break;
+                case "let" :
+                    compileLet();
+                    break;
+                case "while":
+                    compileWhile();
+                    break;
+                case "do":
+                    compileDo();
+                    break;
+                case "return" :
+                    compileReturn();
+                    break;
+                default:
+                    throw new Exception(jackTokenizer.getCurrentToken() + " is not a valid statement");
+            }
         }
+
     }
 
     public void compileDo() throws Exception {
         eat("do");
         eatShallowNonTerminalRule();
+
+        if(jackTokenizer.getCurrentToken().equals("(")) {
+            eat("(");
+            compileExpressionList();
+            eat(")");
+        } else if (jackTokenizer.getCurrentToken().equals(".")) {
+            eat(".");
+            eatShallowNonTerminalRule();
+            eat("(");
+            compileExpressionList();
+            eat(")");
+        }
+
+
         eat(";");
 
     }
 
-    public void compileLet() {
-
+    public void compileLet() throws Exception {
+        eat("let");
+        eatShallowNonTerminalRule();
+        if(jackTokenizer.getCurrentToken().equals("[")) {
+            eat("[");
+            compileExpression();
+            eat("]");
+        }
+        eat("=");
+        compileExpression();
+        eat(";");
     }
 
-    public void compileWhile() {
-
+    public void compileWhile() throws Exception {
+        eat("while");
+        eat("(");
+        compileExpression();
+        eat(")");
+        eat("{");
+        compileStatements();
+        eat("}");
     }
 
     public void compileReturn() throws Exception {
         eat("return");
-        if(!jackTokenizer.peekAtNextToken().equals(";")) {
+        if(!jackTokenizer.getCurrentToken().equals(";")) {
             compileExpression();
         }
         eat(";");
@@ -217,16 +249,82 @@ public class CompilationEngine {
     public void compileIf() throws Exception {
         eat("if");
         eat("(");
-
+        compileExpression();
+        eat(")");
+        eat("{");
+        compileStatements();
+        eat("}");
+        if(jackTokenizer.getCurrentToken().equals("else")) {
+            eat("else");
+            eat("{");
+            compileStatements();
+            eat("}");
+        }
 
     }
 
-    public void compileExpression() {
+    public void compileExpression() throws Exception {
+        compileTerm();
+        while(OP.contains(jackTokenizer.getCurrentToken())) {
+            eatShallowNonTerminalRule();
+            compileTerm();
+        }
+    }
+
+    public void compileTerm() throws Exception {
+        if(jackTokenizer.getCurrentToken().equals("(")) {
+            eat("(");
+            compileExpression();
+            eat(")");
+        } else {
+
+            if(UNARY_OP.contains(jackTokenizer.getCurrentToken())) {
+                eatShallowNonTerminalRule();
+                compileTerm();
+
+            } else {
+                eatShallowNonTerminalRule();
+
+                switch (jackTokenizer.getCurrentToken()) {
+                    case "[":
+                        eat("[");
+                        compileExpression();
+                        eat("]");
+                        break;
+                    case ".":
+                        eat(".");
+                        eatShallowNonTerminalRule();
+                        eat("(");
+                        compileExpressionList();
+                        eat(")");
+                        break;
+                    case "(":
+                        eat("(");
+                        compileExpressionList();
+                        eat(")");
+                        break;
+                }
+            }
+
+        }
+    }
+
+    private void compileExpressionList() throws Exception {
+        if(!jackTokenizer.getCurrentToken().equals(")")) {
+
+            compileExpression();
+
+            while(jackTokenizer.getCurrentToken().equals(",")) {
+                eat(",");
+                compileExpression();
+            }
+        }
 
     }
 
-    public void compileTerm() {
-
+    public void close() throws IOException {
+        writer.close();
     }
+
 
 }
