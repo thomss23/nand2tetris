@@ -15,14 +15,10 @@ public class JackTokenizer {
     private ArrayList<String> tokenList;
     private String currentToken;
     private int positionInTokenList = 0;
-//    private Writer writer;
-
 
 
     public JackTokenizer(File file) throws IOException {
         scanner = new Scanner(file);
-//        int pos = file.getName().indexOf('.');
-//        writer = new FileWriter(file.getName().substring(0,pos) +"T.xml");
         tokenList = new ArrayList<>();
         advance();
     }
@@ -176,35 +172,5 @@ public class JackTokenizer {
     public void close() {
         scanner.close();
     }
-
-//    public void testTokenizer() throws IOException {
-//        writer.write("<tokens>" + "\n  ");
-//        while(hasMoreTokens()) {
-//                setNextToken();
-//                        switch (tokenType()) {
-//                            case SYMBOL:
-//                                writer.write("<symbol> " + symbol() + " </symbol>\n  ");
-//                                break;
-//                            case IDENTIFIER:
-//                                writer.write("<identifier> " + identifier() + " </identifier>\n  ");
-//                                break;
-//                            case KEYWORD:
-//                                writer.write("<keyword> " + keyword() + " </keyword>\n  ");
-//                                break;
-//                            case INT_CONST:
-//                                writer.write("<integerConstant> " + intVal() + " </integerConstant>\n  ");
-//                                break;
-//                            case STRING_CONST:
-//                                writer.write("<stringConstant> " + stringVal() + " </stringConstant>\n  ");
-//                                break;
-//                        }
-//
-//
-//        }
-//        writer.write("</tokens>".trim());
-//        scanner.close();
-//        writer.close();
-//
-//    }
 
 }

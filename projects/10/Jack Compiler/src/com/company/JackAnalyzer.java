@@ -16,25 +16,13 @@ public class JackAnalyzer {
                 getFiles(input, files);
 
                 if (!files.isEmpty()) {
-                    String outputName = input.getName();
-                    if (outputName.indexOf('.') > 0) {
-                        outputName = outputName.substring(0, outputName.indexOf('.'));
-                    } else if (outputName.indexOf('/') > 0) {
-                        outputName = outputName.substring(0, outputName.indexOf('/'));
-                    }
 
-                    File output;
-                    if (input.isFile()) {
-                        output = new File(input.getParent(), outputName + ".xml");
-                    } else {
-                        output = new File(input, outputName + ".xml");
-                    }
-                    System.out.println("Type list " + Keyword.TYPE.toString());
-                    System.out.println("File list " + files);
-                    for(File file : files) {
+                    for (File file : files) {
+
                         JackTokenizer jackTokenizer = new JackTokenizer(file);
                         CompilationEngine compilationEngine = new CompilationEngine(jackTokenizer, file.getName());
                         compilationEngine.compileClass();
+
                     }
 
                 }
@@ -57,9 +45,13 @@ public class JackAnalyzer {
             }
         } else if(input.isDirectory()) {
             File[] innerFiles = input.listFiles();
-            for(File f : innerFiles) {
-                getFiles(f, files);
+
+            if (innerFiles != null) {
+                for(File f : innerFiles) {
+                    getFiles(f, files);
+                }
             }
+
         } else {
             throw new FileNotFoundException("Could not find file or directory.");
         }
