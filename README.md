@@ -1,7 +1,7 @@
 # nand2tetris
 
 ## Course structure
-This is a course I've been doing to learn more about computer architecture. This was achieved by asking the students to build a computer from scratch, as the title suggests, starting from a given nand to writing a game in Jack (the language created in this course).
+This is a course I've been doing to learn more about computer architecture. This was achieved by asking the students to build a computer from scratch, as the title suggests, starting from a given nand gate to writing a game in Jack (the language created in this course).
 
 The big picture:
 ![nand2tetris roadmap](https://raw.githubusercontent.com/gaopinghuang0/nand2tetris/master/big_picture.png)
@@ -15,11 +15,10 @@ The big picture:
 
  * Projects 7,8 - Develop a VM which translates a given vm code (an intermediary language like bytecode for java) to assembly code. 
 
- * Project 9 - Develop a game in Jack. I have created a simple game that lets you control a rectangle that shoots bullets into squares. I decided I wanted to do something with a graphical interface because it was more fun to me. The project's and a youtube video for a demo can be found [here](https://github.com/thomss23/BlockShooter).
+ * Project 9 - Develop a game in Jack. I have created a simple game that lets you control a rectangle that shoots bullets into squares. I decided I wanted to do something with a graphical interface because it was more fun to me. The project's source code and a youtube video for a demo can be found [here](https://github.com/thomss23/BlockShooter).
 
- * Projects 10,11 - Develop a compiler for the Jack language. In project 10 I developed a syntax analyzer for it and in project 11 a code generator to vm code.
+ * Projects 10,11 - Develop a compiler for the Jack language. In project 10 I developed a syntax analyzer for it and in project 11 the syntax analyzer was converted into a vm code generator.
 
- * Project 12 - Develop a simple OS for the hack computer.
 
 
 
