@@ -34,6 +34,7 @@ public class CompilationEngine {
         getSymbol();
 
         compileClassVarDec();
+
         while(!(jt.tokenType() == SYMBOL && jt.getCurrentToken().equals("}"))) {
             compileSubroutine();
         }

@@ -20,7 +20,8 @@ public class JackAnalyzer {
                     for (File file : files) {
 
                         JackTokenizer jackTokenizer = new JackTokenizer(file);
-                        CompilationEngine compilationEngine = new CompilationEngine(jackTokenizer, file.getName());
+                        File outFile = new File(file.getName().substring(0, file.getName().indexOf('.')) + ".vm");
+                        CompilationEngine compilationEngine = new CompilationEngine(jackTokenizer, outFile);
                         compilationEngine.compileClass();
 
                     }
