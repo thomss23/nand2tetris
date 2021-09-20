@@ -23,20 +23,21 @@ public class CompilationEngine {
         ifCount = -1;
     }
 
-    public void compileClass() throws Exception {
+    public void compileClass() {
+
         if(jt.hasMoreTokens()) jt.setNextToken();
-        // consume class keyword
+
         getKeyword();
-        // get class name identifier
+
         className = getIdentifier();
-        // consume opening brace
+
         getSymbol();
-        // compile variable declarations and subroutine declarations
+
         compileClassVarDec();
         while(!(jt.tokenType() == SYMBOL && jt.getCurrentToken().equals("}"))) {
             compileSubroutine();
         }
-        // consume closing brace
+
         getSymbol();
 
         jt.close();
@@ -45,17 +46,17 @@ public class CompilationEngine {
     }
 
 
-    public void compileClassVarDec() throws Exception {
+    public void compileClassVarDec() {
         while(jt.tokenType() == KEYWORD
                 && (jt.keyword().equalsIgnoreCase("static")
                 || jt.keyword().equalsIgnoreCase("field"))) {
-            // get static or field keyword
+
             String kind = getKeyword();
-            // get variable type
+
             String type = getType();
-            // get static and field variable names
+
             ArrayList<String> varNames = getVarNames();
-            // populate symbol table
+
             for(String varName : varNames) {
                 st.define(varName, type, kind);
             }
@@ -64,16 +65,14 @@ public class CompilationEngine {
     }
 
     private void compileSubroutine() {
+
         st.startSubroutine();
-        // get constructor, function, or method keyword
+
         String funcType = getKeyword();
-        // get return type
-        String returnType = getType();
-        // get subroutine name
+        getType();
         String funcName = getIdentifier();
-        // consume open parenthesis of parameter list
         getSymbol();
-        // get parameters and add to symbol table
+
         ArrayList<String[]> params = compileParameterList();
         if(funcType.equals("method")) {
             st.addImplicitArg();
@@ -81,45 +80,51 @@ public class CompilationEngine {
         for(String[] param : params) {
             st.define(param[0], param[1], "arg");
         }
-        // consume close parenthesis of parameter list
+
         getSymbol();
-        // consume opening brace
         getSymbol();
-        // get local variables and add to symbol table
+
         ArrayList<String[]> localVars = compileVarDec();
+
         for(String[] localVar : localVars) {
             st.define(localVar[0], localVar[1], "var");
         }
+
         vm.writeFunction(className + "." + funcName, st.varCount("var"));
+
         if(funcType.equals("constructor")) {
+
             vm.writePush("constant", st.varCount("field"));
             vm.writeCall("Memory.alloc", 1);
             vm.writePop("pointer", 0);
+
         } else if(funcType.equals("method")) {
             vm.writePush("argument", 0);
             vm.writePop("pointer", 0);
         }
         compileStatements();
-        // consume closing brace
+
         getSymbol();
     }
 
     private ArrayList<String[]> compileParameterList() {
+
         ArrayList<String[]> params = new ArrayList<>();
         String type;
         String name;
-        // check for close paren, which means no parameters
+
         while(!(jt.tokenType() == SYMBOL && jt.getCurrentToken().equals(")"))) {
-            // consume comma if not first in list
+
             if(jt.tokenType() == SYMBOL && jt.getCurrentToken().equals(",")) getSymbol();
-            // get param type
+
             type = getType();
-            // get param name
+
             name = getIdentifier();
             String[] temp = new String[2];
             temp[0] = name;
             temp[1] = type;
             params.add(temp);
+
         }
         return params;
     }
@@ -127,17 +132,20 @@ public class CompilationEngine {
     private ArrayList<String[]> compileVarDec() {
         String type;
         ArrayList<String> names;
-        ArrayList<String[]> vars = new ArrayList<String[]>();
+        ArrayList<String[]> vars = new ArrayList<>();
         while(jt.tokenType() == KEYWORD && jt.keyword().equalsIgnoreCase("var")) {
-            // consume var keyword
+
             getKeyword();
             type = getType();
             names = getVarNames();
+
             for(String name : names) {
+
                 String[] temp = new String[2];
                 temp[0] = name;
                 temp[1] = type;
                 vars.add(temp);
+
             }
         }
         return vars;
@@ -160,124 +168,135 @@ public class CompilationEngine {
     }
 
     private void compileDo() {
-        // consume do keyword
+
         getKeyword();
         compileTerm();
-        // consume ;
+
         getSymbol();
         vm.writePop("temp", 0);
     }
 
     private void compileLet() {
-        // consume let keyword
+
         getKeyword();
-        // get variable
+
         String var = getIdentifier();
-        // parse index and assignment
+
         if(jt.tokenType() == SYMBOL && jt.getCurrentToken().equals("[")) {
+
             vm.writePush(st.kindOf(var), st.indexOf(var));
-            // consume opening bracket
+
             getSymbol();
             compileExpression();
-            // consume closing bracket
+
             getSymbol();
             vm.writeArithmetic("add");
             vm.writePop("pointer", 1);
-            // consume =
+
             getSymbol();
             compileExpression();
-            // consume ;
+
             getSymbol();
             vm.writePop("that", 0);
-            // parse assignment only
+
         } else if(jt.tokenType() == SYMBOL && jt.getCurrentToken().equals("=")) {
-            // consume =
+
             getSymbol();
             compileExpression();
-            // consume ;
+
             getSymbol();
             vm.writePop(st.kindOf(var), st.indexOf(var));
+
         }
     }
 
     private void compileWhile() {
-        // increment while loop counter
+
         whileCount++;
         int thisWhileCount = whileCount;
-        // consume while keyword
+
         getKeyword();
-        // label loop
+
         vm.writeLabel("WHILE_BEGIN" + thisWhileCount);
-        // parse condition
-        // consume open paren
+
         getSymbol();
         compileExpression();
-        // consume close paren
+
         getSymbol();
         vm.writeArithmetic("not");
         vm.writeIf("WHILE_END" + thisWhileCount);
-        // parse loop statements
-        // consume opening brace
+
         getSymbol();
         compileStatements();
-        // consume closing brace
+
+
         getSymbol();
         vm.writeGoto("WHILE_BEGIN" + thisWhileCount);
         vm.writeLabel("WHILE_END" + thisWhileCount);
+
     }
 
     private void compileReturn() {
-        // consume return keyword
+
         getKeyword();
+
         if(jt.tokenType() == SYMBOL && jt.getCurrentToken().equals(";")) {
+
             vm.writePush("constant", 0);
-            // consume ;
+
         } else {
             compileExpression();
-            // consume ;
+
         }
+
         vm.writeReturn();
         getSymbol();
+
     }
 
     private void compileIf() {
         ifCount++;
         int thisIfCount = ifCount;
-        // consume if keyword
+
         getKeyword();
-        // consume open paren
+
         getSymbol();
         compileExpression();
-        // consume close paren
+
         getSymbol();
-        // consume opening brace
+
         getSymbol();
         vm.writeIf("IF_TRUE" + thisIfCount);
         vm.writeGoto("IF_FALSE" + thisIfCount);
         vm.writeLabel("IF_TRUE" + thisIfCount);
         compileStatements();
-        // consume closing brace
+
         getSymbol();
         vm.writeGoto("IF_END" + thisIfCount);
         vm.writeLabel("IF_FALSE" + thisIfCount);
         if(jt.tokenType() == KEYWORD && jt.keyword().equalsIgnoreCase("else")) {
-            // consume else keyword
+
+
             getKeyword();
-            // consume opening brace
+
             getSymbol();
             compileStatements();
-            // consume closing brace
+
             getSymbol();
         }
         vm.writeLabel("IF_END" + thisIfCount);
     }
 
-    private int compileExpression() {                   // prints compiled expression and
-        if(isStartOfTerm()) {                           //returns 1 if an expression was compiled, 0 otherwise
+    private int compileExpression() {
+        if(isStartOfTerm()) {
+
             compileTerm();
+
             while(isOperator()) {
+
                 char op = getSymbol();
                 compileTerm();
+
                 if(op == '+') vm.writeArithmetic("add");
                 else if(op == '-') vm.writeArithmetic("sub");
                 else if(op == '*') vm.writeCall("Math.multiply", 2);
@@ -288,70 +307,92 @@ public class CompilationEngine {
                 else if(op == '>') vm.writeArithmetic("gt");
                 else if(op == '=') vm.writeArithmetic("eq");
             }
+
             return 1;
         }
+
         return 0;
     }
 
     private void compileTerm() {
+
         if(jt.tokenType() == INT_CONST) {
+
             int i = getIntConstant();
             vm.writePush("constant", i);
+
         } else if(jt.tokenType() == STRING_CONST) {
+
             String str = getStrConstant();
+
             vm.writePush("constant", str.length());
             vm.writeCall("String.new", 1);
+
             for(int c = 0; c < str.length(); c++) {
                 vm.writePush("constant", str.charAt(c));
                 vm.writeCall("String.appendChar", 2);
             }
+
         } else if(isKeywordConstant()) {
+
             String keyword = getKeyword();
             if(keyword.equals("null") || keyword.equals("false")) {
+
                 vm.writePush("constant", 0);
             } else if(keyword.equals("true")) {
+
                 vm.writePush("constant", 0);
                 vm.writeArithmetic("not");
+
             } else {
                 vm.writePush("pointer", 0);
             }
+
         } else if(jt.tokenType() == IDENTIFIER) {
+
             String first = getIdentifier();
+
             if(jt.tokenType() == SYMBOL && jt.getCurrentToken().equals("[")) {
+
                 vm.writePush(st.kindOf(first), st.indexOf(first));
-                // consume opening bracket
+
                 getSymbol();
                 compileExpression();
-                // consume closing bracket
+
                 getSymbol();
+
                 vm.writeArithmetic("add");
                 vm.writePop("pointer", 1);
                 vm.writePush("that", 0);
-            } else if(jt.tokenType() == SYMBOL && jt.getCurrentToken().equals("(")) {   // must be method call on this
-                vm.writePush("pointer", 0);                                             // class object
-                // consume opening paren
+
+            } else if(jt.tokenType() == SYMBOL && jt.getCurrentToken().equals("(")) {
+
+                vm.writePush("pointer", 0);
+
                 getSymbol();
                 int nArgs = compileExpressionList();
-                // consume closing paren
+
                 getSymbol();
                 vm.writeCall(className + "." + first, nArgs + 1);
+
             } else if(jt.tokenType() == SYMBOL && jt.getCurrentToken().equals(".")) {
-                // consume dot
+
                 getSymbol();
                 String second = getIdentifier();
                 if(st.indexOf(first) < 0) { // if pre-dot is not a symbol, must be function call from another class
-                    // consume open paren
+
                     getSymbol();
                     int nArgs = compileExpressionList();
-                    // consume close paren
+
                     getSymbol();
                     vm.writeCall(first + "." + second, nArgs);
-                } else {    // if pre-dot is a symbol, must be a method call on an object
+
+                } else {// if pre-dot is a symbol, must be a method call on an object
                     vm.writePush(st.kindOf(first), st.indexOf(first));
-                    // consume open paren
+
                     getSymbol();
                     int nArgs = compileExpressionList();
-                    // consume close paren
+
                     getSymbol();
                     vm.writeCall(st.typeOf(first) + "." + second, nArgs + 1);
                 }
@@ -359,16 +400,19 @@ public class CompilationEngine {
                 vm.writePush(st.kindOf(first), st.indexOf(first));
             }
         } else if(jt.tokenType() == SYMBOL && jt.getCurrentToken().equals("(")) {
-            // consume open paren
+
             getSymbol();
             compileExpression();
-            // consume close paren
+
             getSymbol();
+
         } else if(isUnaryOp()) {
+
             char op = getSymbol();
             compileTerm();
             if(op == '-') vm.writeArithmetic("neg");
             else if(op == '~') vm.writeArithmetic("not");
+
         }
     }
 
@@ -376,14 +420,15 @@ public class CompilationEngine {
         int numExps = 0;                    // how many expressions were compiled
         numExps += compileExpression();
         while(jt.tokenType() == SYMBOL && jt.getCurrentToken().equals(",")) {
-            // consume comma
+
             getSymbol();
             numExps += compileExpression();
-        }
-        return numExps;
-    }
 
-    //===========
+        }
+
+        return numExps;
+
+    }
 
     private String getKeyword() {
         String keyword = jt.getCurrentToken();
