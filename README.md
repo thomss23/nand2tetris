@@ -19,6 +19,7 @@ The big picture:
 
  * Projects 10 - Develop a syntax analyzer for the Jack language.
 
+ * Projects 11 - Extend the syntaz analyzer into a full jack compiler. 
 
 
 
