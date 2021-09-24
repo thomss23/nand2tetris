@@ -83,17 +83,17 @@ class Math {
         var int result;
 
         if(y = 0) {
-        do Sys.error(3);
+            do Sys.error(3);
         }
 
         let result = Math.divideRec(Math.abs(x), Math.abs(y));
 
         if(x < 0) {
-        let result = -result;
+            let result = -result;
         }
 
         if(y < 0) {
-        let result = -result;
+            let result = -result;
         }
 
         return result;
@@ -103,17 +103,21 @@ class Math {
         var int q;
 
         if(y < 0) {
-        return 0;
+            return 0;
         }
+
         if(y > x) {
-        return 0;
+            return 0;
         }
+
         let q = Math.divideRec(x, y + y);
+
         if((x - ((q + q) * y)) < y) {
-        return q + q;
+            return q + q;
         }
+
         else {
-        return q + q + 1;
+            return q + q + 1;
         }
     } 
     /** Returns the integer part of the square root of x. */
