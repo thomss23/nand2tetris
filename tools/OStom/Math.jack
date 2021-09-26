@@ -75,7 +75,14 @@ class Math {
     }
 
     function int mod(int a, int b) {
-        
+        var int result;
+        var int remainder;
+
+        let result = Math.divide(a,b);
+
+        let remainder = a - (result * b);
+
+        return remainder;
     }
 
     /** Returns the integer part of x/y.
