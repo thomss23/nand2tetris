@@ -12,53 +12,137 @@
  */
 class String {
 
+    field Array str;
+    field int size = 0;
     /** constructs a new empty string with a maximum length of maxLength
      *  and initial length of 0. */
     constructor String new(int maxLength) {
+        let size = 0;
+        let str = Array.new(maxLength);
+        return this;
     }
 
     /** Disposes this string. */
     method void dispose() {
+        do Memory.deAlloc(this);
     }
 
     /** Returns the current length of this string. */
     method int length() {
+        do str.dispose();
+        return size;
     }
 
     /** Returns the character at the j-th location of this string. */
     method char charAt(int j) {
+        if((j < 0) | (j > (sLength - 1))) {
+            do Sys.error(15);
+    }
+        return str[j];
     }
 
     /** Sets the character at the j-th location of this string to c. */
     method void setCharAt(int j, char c) {
+        if((j < 0) | (j > (sLength - 1))) {
+            do Sys.error(16);
+    }
+        let str[j] = c;
+        return;
     }
 
     /** Appends c to this string's end and returns this string. */
     method String appendChar(char c) {
+        let str[size] = c;
+        let size = size + 1;
+        return this;
     }
 
     /** Erases the last character from this string. */
     method void eraseLastChar() {
+        if(sLength = 0) {
+            do Sys.error(18);
+        }
+
+        let size = size - 1;
+        return;
     }
 
     /** Returns the integer value of this string, 
      *  until a non-digit character is detected. */
     method int intValue() {
+        return String.string2int(this);
+    }
+
+    function int string2int(String str) {
+        var int val;
+        var int i;
+        var int d;
+
+        let val = 0;
+        let i = 0;
+
+        while(i <= str.length) {
+            let d = str[i];
+            let val = val * 10 + d;
+        }
+
+        return val;
+    }
+
+    method Array getArray() {
+        return str;
+    }
+
+    method int getSize() {
+        return size;
     }
 
     /** Sets this string to hold a representation of the given value. */
     method void setInt(int val) {
+        var String newStr;
+        let newStr  = int2String(val);
+
+        let str = newStr.getArray();
+        let size = newStr.getSize();
+
+        return;
+    }
+
+    function String int2String(int val) {
+        var String c;
+        let c = String.new(64);
+        let c = c.appendChar(String.mod(val, 10));
+
+        if(val < 10) {
+            return c;
+        } else {
+            return int2String(val/10).appendChar(c);
+        }
     }
 
     /** Returns the new line character. */
     function char newLine() {
+        return 128;
     }
 
     /** Returns the backspace character. */
     function char backSpace() {
+        return 129;
     }
 
     /** Returns the double quote (") character. */
     function char doubleQuote() {
+        return 34;
+    }
+
+    function int mod(int a, int b) {
+        var int result;
+        var int remainder;
+
+        let result = Math.divide(a,b);
+
+        let remainder = a - (result * b);
+
+        return remainder;
     }
 }
